@@ -4,11 +4,16 @@
 local UIModule = {}
 
 local CatchingModule = nil
+local Options = nil
 local Font = require("src.render.Font")
 local ballImageCache = {}
 
 function UIModule.setCatchingModule(mod)
   CatchingModule = mod
+end
+
+function UIModule.setOptions(opts)
+  Options = opts
 end
 
 local function getBallImage(ballType)
@@ -49,8 +54,11 @@ function UIModule.drawScreen(game, ow)
   end
 
   -- 3. Draw clean, compact count text using native Gen 1 Font.draw
-  lg.setColor(0, 0, 0, 1)
-  Font.draw("× " .. tostring(count), 125, 132)
+  local showCount = Options == nil or Options:get("show_ball_count") ~= false
+  if showCount then
+    lg.setColor(0, 0, 0, 1)
+    Font.draw("× " .. tostring(count), 125, 132)
+  end
 
   lg.pop()
 end
