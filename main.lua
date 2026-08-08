@@ -22,7 +22,12 @@ return function(mod)
   local CombatModule = require(modRequirePrefix .. ".src.combat")
   local UIModule = require(modRequirePrefix .. ".src.ui")
 
+  mod.options:define({
+    { key = "show_ball_count", label = "SHOW BALL COUNT", type = "toggle", default = true },
+  })
+
   UIModule.setCatchingModule(CatchingModule)
+  UIModule.setOptions(mod.options)
 
   ---------------------------------------------------------------------------
   -- Vanilla grass encounter hook: allow encounters EXCEPT on caught cells
