@@ -24,6 +24,10 @@ return function(mod)
 
   UIModule.setCatchingModule(CatchingModule)
 
+  mod.options:define({
+    { key = "battle_intro", label = "BATTLE INTRO", type = "toggle", default = true },
+  })
+
   ---------------------------------------------------------------------------
   -- Vanilla grass encounter hook: allow encounters EXCEPT on caught cells
   ---------------------------------------------------------------------------
@@ -380,7 +384,17 @@ return function(mod)
 
         if BattleState and BattleState.newWild then
           local battle = BattleState.newWild(Game, species, level)
-          if battle then Game.stack:push(battle) end
+          if battle then
+            battle.onFinish = function(result) self:afterBattle(result, battle) end
+            if mod.options:get("battle_intro") then
+              -- self:pushBattle plays the wipe/flash transition and the
+              -- battle theme the way grass/fishing/static encounters do;
+              -- a raw Game.stack:push skips both.
+              self:pushBattle(battle)
+            else
+              Game.stack:push(battle)
+            end
+          end
         end
       end
 
