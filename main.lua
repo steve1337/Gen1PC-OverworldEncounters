@@ -22,7 +22,27 @@ return function(mod)
   local CombatModule = require(modRequirePrefix .. ".src.combat")
   local UIModule = require(modRequirePrefix .. ".src.ui")
 
+  mod.options:define({
+    {
+      key = "hud_opacity",
+      label = "HUD OPACITY",
+      type = "number",
+      default = 100,
+      min = 0,
+      max = 100,
+      step = 10,
+    },
+    {
+      key = "hud_size",
+      label = "HUD SIZE",
+      type = "choice",
+      default = "normal",
+      choices = { { "NORMAL", "normal" }, { "COMPACT", "compact" } },
+    },
+  })
+
   UIModule.setCatchingModule(CatchingModule)
+  UIModule.setOptions(mod.options)
 
   ---------------------------------------------------------------------------
   -- Vanilla grass encounter hook: allow encounters EXCEPT on caught cells
