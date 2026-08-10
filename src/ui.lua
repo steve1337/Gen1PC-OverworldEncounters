@@ -164,8 +164,7 @@ function UIModule.drawScreen(game, ow)
     drawHud(lg, nil, hudLayout, selectedBall, count)
   end
 
-    lg.pop()
-  end
+  lg.pop()
 end
 
 return UIModule
