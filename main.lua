@@ -39,14 +39,16 @@ return function(mod)
       default = "normal",
       choices = { { "NORMAL", "normal" }, { "COMPACT", "compact" } },
     },
+    { 
+      key = "battle_intro", 
+      label = "BATTLE INTRO", 
+      type = "toggle", 
+      default = true 
+    },
   })
 
   UIModule.setCatchingModule(CatchingModule)
   UIModule.setOptions(mod.options)
-
-  mod.options:define({
-    { key = "battle_intro", label = "BATTLE INTRO", type = "toggle", default = true },
-  })
 
   ---------------------------------------------------------------------------
   -- Vanilla grass encounter hook: allow encounters EXCEPT on caught cells
