@@ -107,6 +107,12 @@ end
 -- Screen-space UI draw (160x144 Game Boy canvas)
 function UIModule.drawScreen(game, ow)
   if not love or not love.graphics then return end
+  -- Only draw while the overworld owns the screen.  A text box or menu is its
+  -- own state drawn above the overworld, and the true-color rect below would
+  -- exempt that corner of the finished frame from the palette pass, leaving the
+  -- message box in raw DMG shades there (the stray white rectangle).
+  local stack = game and game.stack
+  if stack and stack.top and stack:top() ~= ow then return end
   -- Range is enforced by the option's min/max when the player edits it.
   local opacity = (Options and tonumber(Options:get("hud_opacity")) or 100) / 100
   if opacity <= 0 then return end
