@@ -1,6 +1,6 @@
 -- Overworld Encounters – Expanded Version with Overworld Battles & Catching
 -- Visible wild Pokémon spawns, 1-6 tile Pokéball throwing physics, delayed mon removal on impact,
--- pure left-right 3D wobble physics, vanilla encounters active with caught cell suppression,
+-- pure left-right 3D wobble physics, vanilla encounters replaced (or kept) via the VANILLA ENCOUNTERS option,
 -- follower battle chase, 1-tile gap attack animations, 160x144 UI overlays, and 100% PokePCFollowers compatibility.
 
 return function(mod)
@@ -45,24 +45,48 @@ return function(mod)
       type = "toggle", 
       default = true 
     },
+    {
+      key = "vanilla_encounters",
+      label = "VANILLA ENCOUNTERS",
+      type = "choice",
+      default = "replace",
+      choices = { { "REPLACED", "replace" }, { "KEPT", "keep" } },
+    },
   })
 
   UIModule.setCatchingModule(CatchingModule)
   UIModule.setOptions(mod.options)
 
   ---------------------------------------------------------------------------
-  -- Vanilla grass encounter hook: allow encounters EXCEPT on caught cells
+  -- Vanilla encounter suppression
   ---------------------------------------------------------------------------
+
+  -- The roamers walk land cells only, so a surfing roll has no visible
+  -- counterpart on screen and is left vanilla even in REPLACED mode.
+  local ROAMED_TERRAIN = { grass = true, indoor = true }
+
+  local function suppressVanillaRoll(mapId, terrain, player)
+    if not mapId then return false end
+
+    if player and CatchingModule.isCellSuppressed(mapId, player.cellX, player.cellY) then
+      return true
+    end
+
+    if mod.options:get("vanilla_encounters") ~= "replace" then return false end
+    if terrain and not ROAMED_TERRAIN[terrain] then return false end
+
+    -- only where this mod actually spawns roamers: a map it skips keeps its
+    -- vanilla encounters instead of becoming encounter-free
+    return Database.isWildMap(mapId) and true or false
+  end
 
   if not OverworldController.__overworldEncountersRollWrapped then
     OverworldController.__overworldEncountersRollWrapped = true
 
     local origRollEncounter = OverworldController.rollEncounter
     OverworldController.rollEncounter = function(self, encDef, terrain)
-      if self and self.map and self.player then
-        if CatchingModule.isCellSuppressed(self.map.id, self.player.cellX, self.player.cellY) then
-          return nil
-        end
+      if self and self.map and suppressVanillaRoll(self.map.id, terrain, self.player) then
+        return nil
       end
       if origRollEncounter then
         return origRollEncounter(self, encDef, terrain)
@@ -71,11 +95,9 @@ return function(mod)
   end
 
   mod.hooks:wrap("encounter.roll", function(next, encDef, ctx)
-    if ctx and ctx.mapId and Game and Game.overworld and Game.overworld.player then
-      local p = Game.overworld.player
-      if CatchingModule.isCellSuppressed(ctx.mapId, p.cellX, p.cellY) then
-        return nil
-      end
+    local ow = Game and Game.overworld
+    if ctx and suppressVanillaRoll(ctx.mapId, ctx.terrain, ow and ow.player) then
+      return nil
     end
     return next(encDef, ctx)
   end)
