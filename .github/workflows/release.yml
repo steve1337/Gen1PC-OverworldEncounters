@@ -16,13 +16,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Package Mod Zip
-        run: |
-          mkdir -p dist
-          zip -r dist/overworld_encounters.zip . -x "*.git*" "*.github*" "*.vscode*" "__pycache__*"
+        run: ./build.sh
 
       - name: Upload Release Artifact
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/overworld_encounters.zip
+          files: |
+            dist/overworld_encounters.zip
+            dist/overworld_encounters-*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
